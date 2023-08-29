@@ -1,6 +1,6 @@
 const followService = require('../services/followService');
+const likeService = require('../services/likeService');
 const Publication = require('../models/Publication');
-const User = require('../models/User');
 const path = require('path');
 const fs = require('fs');
 
@@ -86,6 +86,8 @@ const user = async (req, res) => {
 
     const itemsPerPage = 10;
 
+    const myLikes = await likeService.likeUserid(req.user.id);
+
     let total = await Publication.countDocuments({ user: userId });
 
     Publication.find({ "user": userId })
@@ -99,7 +101,8 @@ const user = async (req, res) => {
                 page,
                 total,
                 pages: Math.ceil(total / itemsPerPage),
-                publications
+                publications,
+                likes: myLikes.likes
             });
         })
         .catch((error) => {
@@ -182,6 +185,8 @@ const feed = async(req, res) => {
     try {
         const myFollows = await followService.followUserId(req.user.id);
 
+        const myLikes = await likeService.likeUserid(req.user.id);
+
         const total = await Publication.countDocuments({user: myFollows.following});
 
         const publications = Publication.find({user: myFollows.following})
@@ -193,6 +198,7 @@ const feed = async(req, res) => {
                     status: "success",
                     message: "Feed of publications",
                     following: myFollows.following,
+                    likes: myLikes.likes,
                     total,
                     page,
                     pages: Math.ceil(total / itemsPerPage),

@@ -13,6 +13,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 
 const user_routes        = require('./routes/user');
+const like_routes        = require('./routes/like');               
 const follow_routes      = require('./routes/follow');
 const publication_routes = require('./routes/publication');
 
@@ -21,6 +22,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/user", user_routes);
+app.use("/api/like", like_routes);
 app.use("/api/follow", follow_routes);
 app.use("/api/publication", publication_routes);
 

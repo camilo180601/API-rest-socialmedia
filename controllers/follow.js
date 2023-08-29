@@ -1,5 +1,4 @@
 const Follow = require('../models/Follow');
-const User = require('../models/User');
 const mongoosePagination = require('mongoose-pagination');
 const followService = require('../services/followService');
 

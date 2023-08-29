@@ -81,7 +81,7 @@ const register = (req, res) => {
 
 const login = (req, res) => {
 
-    params = req.body;
+    let params = req.body;
 
     if (!params.email || !params.password) {
         return res.status(400).json({
