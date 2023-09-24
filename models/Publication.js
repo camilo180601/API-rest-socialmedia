@@ -5,6 +5,10 @@ const PublicationSchema = Schema({
         type: Schema.ObjectId,
         ref: "User"
     },
+    publication: {
+        type: Schema.ObjectId,
+        ref: "Publication"
+    },
     text: {
         type: String,
         required: true

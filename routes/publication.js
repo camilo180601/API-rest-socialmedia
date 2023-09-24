@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
 
 const uploads = multer({storage});
 
-router.post("/save", Check.auth, PublicationController.save);
+router.post("/save/:id?", Check.auth, PublicationController.save);
 router.get("/detail/:id", Check.auth, PublicationController.detail);
 router.delete("/remove/:id", Check.auth, PublicationController.remove);
 router.get("/user/:id/:page?", Check.auth, PublicationController.user);

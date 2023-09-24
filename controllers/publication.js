@@ -6,44 +6,59 @@ const fs = require('fs');
 
 const save = (req, res) => {
 
-    const params = req.body;
+    try {
+        const params = req.body;
 
-    if (!params.text) {
-        return res.status(400).send({
+        if (!params.text) {
+            return res.status(400).send({
+                status: "error",
+                message: "You must send a text with the publication"
+            });
+        }
+
+        let publication = new Publication(params);
+        publication.user = req.user.id;
+
+        if(req.params.id){
+            publication.publication = req.params.id;
+        }
+
+        publication.save()
+            .then((publicationStored) => {
+                return res.status(200).send({
+                    status: "success",
+                    message: "Publication saved",
+                    publication: publicationStored
+                });
+            })
+            .catch((error) => {
+                return res.status(500).send({
+                    status: "error",
+                    message: "Error at create publication"
+                });
+            });
+
+    } catch (error) {
+        return res.status(500).send({
             status: "error",
-            message: "You must send a text with the publication"
+            message: "Error at create publication"
         });
     }
-
-    let publication = new Publication(params);
-    publication.user = req.user.id;
-
-    publication.save()
-        .then((publicationStored) => {
-            return res.status(200).send({
-                status: "success",
-                message: "Publication saved",
-                publication: publicationStored
-            });
-        })
-        .catch((error) => {
-            return res.status(500).send({
-                status: "error",
-                message: "Error at create publication"
-            });
-        });
 }
 
-const detail = (req, res) => {
+const detail = async(req, res) => {
 
     const id = req.params.id;
+
+    let comments = await Publication.find({publication: id}).sort("-created_at");
 
     Publication.findById(id)
         .then((publication) => {
             return res.status(200).send({
                 status: "success",
                 message: "Detail publication",
-                publication
+                publication,
+                comments
             });
         })
         .catch((error) => {
@@ -159,10 +174,10 @@ const media = (req, res) => {
 
     const file = req.params.file;
 
-    const filepath = "./uploads/publications/"+file;
+    const filepath = "./uploads/publications/" + file;
 
     fs.stat(filepath, (error, exists) => {
-        if(!exists){
+        if (!exists) {
             return res.status(404).send({
                 status: "error",
                 message: "No exists image"
@@ -172,11 +187,11 @@ const media = (req, res) => {
     })
 }
 
-const feed = async(req, res) => {
+const feed = async (req, res) => {
 
     let page = 1;
 
-    if(req.params.page){
+    if (req.params.page) {
         page = req.params.page;
     }
 
@@ -187,9 +202,9 @@ const feed = async(req, res) => {
 
         const myLikes = await likeService.likeUserid(req.user.id);
 
-        const total = await Publication.countDocuments({user: myFollows.following});
+        const total = await Publication.countDocuments({ user: myFollows.following });
 
-        const publications = Publication.find({user: myFollows.following})
+        const publications = Publication.find({ user: myFollows.following })
             .populate("user", "-password -role -__v -email")
             .sort("-created_at")
             .paginate(page, itemsPerPage)
